@@ -1,0 +1,32 @@
+body{
+    background-color: rgb(54, 54, 54) !important;
+}
+
+h3, h4, h5, p, label{
+color:rgb(255, 255, 255) !important;
+}
+
+.card{
+background-color:rgb(116, 116, 116) !important ;
+border-color: rgb(255, 255, 255) !important;
+
+}
+.btn-primary{
+    background-color: rgb(255, 81, 18) !important;
+    border-color: rgb(248, 79, 17) !important;
+    width: 135px;
+}
+
+.btn-primary:hover{
+    background-color: rgb(199, 71, 12) !important;
+}
+
+.btn-secondary{
+    background-color: rgb(255, 81, 18) !important;
+    border-color: rgb(248, 79, 17) !important;
+}
+.alert{
+    color: white !important;
+    background-color:rgb(255, 117, 67,0.5) !important;
+    border-color:rgb(255, 81, 18) !important;
+}
