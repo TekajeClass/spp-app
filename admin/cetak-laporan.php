@@ -20,7 +20,7 @@
 <nav class="head">
     <div class="body">
 		<br><br><br>
-        <img src="../logo-SMKN-3.png"><br>
+        <img src="../Logo-SMKN-3.png"><br>
         <h2>SMK Negeri 3 Kota Bekasi</h2>
         <a>Jl. Mutiara Gading Timur Blk. L No.1, RT.003/RW.001, Mustika Jaya, Kec.Mustika Jaya. Kota Bks, Jawa Barat 17158 </a>
     </div>
