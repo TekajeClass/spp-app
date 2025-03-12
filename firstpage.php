@@ -4,7 +4,7 @@
 	<link rel="icon" type="image/png" href="Logo-SMKN-3.png">
 	<style>
 		body{
-			background-image:url("halaman-depan2.png");
+			background-image:url("halaman-depan.png");
 		}
 
 		.parent{
