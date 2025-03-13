@@ -26,7 +26,7 @@
     </div>
     </div>
 </nav>
-<hr color="black" size="7">
+<hr color="white" size="7">
 <table border="1" cellpadding="5" align="center" class="table table-dark table-striped">
 	<tr class="fw bold">
 		<td>No</td>
