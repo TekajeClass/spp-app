@@ -1,0 +1,135 @@
+- name: Install MariaDB and Web Application (Yml Code by Bagas Maulana | Source Code by Rizqi Hasan Fadilla)
+  hosts: target
+  become: yes
+  vars:
+    root_password: "123"
+    mariadb_host: "112.29.10.110"
+    web_server_dir: "/var/www/spp-app"
+
+  tasks:
+    - name: Install all package require
+      ansible.builtin.apt:
+        name:
+          - mariadb-server
+          - git
+          - php
+          - php-mysql
+          - python3-pymysql
+        state: present
+      #    update_cache: yes
+
+    - name: Start and enable MariaDB service
+      ansible.builtin.service:
+        name: mariadb
+        state: started
+        enabled: yes
+
+    - name: Start and enable Apache service
+      ansible.builtin.service:
+        name: apache2
+        state: started
+        enabled: yes
+   
+    - name: Secure MariaDB and set root password
+      ansible.builtin.command: >
+        mysql -u root --password='{{ root_password }}' -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '{{ root_password }}';"
+
+    - name: Allow remote connections in MariaDB config
+      ansible.builtin.lineinfile:
+        path: /etc/mysql/mariadb.conf.d/50-server.cnf
+        regexp: '^bind-address'
+        line: 'bind-address = 0.0.0.0'
+
+    - name: Get web application from github tekaje class
+      git:
+        repo: https://github.com/TekajeClass/spp-app.git
+        dest: "{{ web_server_dir }}"
+        version: main
+        force: yes
+
+    - name: Remove default html directory
+      ansible.builtin.file:
+        path: "/var/www/html"
+        state: absent
+
+    - name: Grant Maximum privileges for root
+      mysql_user:
+        login_user: "root"
+        login_password: "{{ root_password }}"
+        name: "root"
+        host: "%"
+        password: "{{ root_password }}"
+        priv: "*.*:ALL,GRANT"
+        state: present
+
+    - name: Create database
+      community.mysql.mysql_db:
+        name: "db_spp"
+        state: present
+        login_user: root
+        login_password: "{{ root_password }}"
+    
+    - name: import db-spp content
+      mysql_db:
+        login_user: "root"
+        login_password: "123"
+        name: "db_spp"
+        state: import
+        target: "{{ web_server_dir }}/copy_this_db/db_spp.sql"
+
+    - name: delete petugas table
+      mysql_query:
+        login_user: "root"
+        login_password: "123"
+        login_db: "db_spp"
+        query: "DROP TABLE IF EXISTS petugas;"
+
+    - name: import petugas table
+      mysql_db:
+        login_user: "root"
+        login_password: "123"
+        name: "db_spp"
+        state: import
+        target : "{{ web_server_dir }}/copy_this_db/petugas.sql"
+
+    - name: Change root password on koneksi.php
+      ansible.builtin.lineinfile:
+        path: /var/www/spp-app/koneksi.php
+        regexp: "^(\\$koneksi = mysqli_connect\\()'localhost','root','','db_spp'(\\);)"
+        line: "$koneksi = mysqli_connect('{{ mariadb_host }}','root','{{ root_password }}','db_spp');"
+
+    - name: Restart MariaDB
+      ansible.builtin.service:
+        name: mariadb
+        state: restarted
+
+    - name: Make new Virtual Host
+      ansible.builtin.copy:
+        dest: /etc/apache2/sites-available/app.conf
+        content: |
+          <VirtualHost *:80>
+            ServerName tekaje.net
+            ServerAdmin bagas@netmaster
+
+            DocumentRoot {{ web_server_dir }}
+
+            ErrorLog ${APACHE_LOG_DIR}/error.log
+            CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+          </VirtualHost>
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: deactivate default virtual host
+      ansible.builtin.command:
+        a2dissite 000-default.conf
+
+    - name: activate app.conf virtual host
+      ansible.builtin.command:
+        a2ensite app.conf
+
+    - name: Restart Apache service
+      ansible.builtin.service:
+        name: apache2
+        state: restarted
